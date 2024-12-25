@@ -1,0 +1,11 @@
+<h1>Patient List</h1>
+<ul>
+    {% for patient in patients %}
+        <li>{{ patient.user.nom }} {{ patient.user.prenom }} - NSS: {{ patient.nss }}
+            <a href="{% url 'update_patient' patient.pk %}">Edit</a> |
+            <a href="{% url 'delete_patient' patient.pk %}">Delete</a> |
+            <a href="{% url 'view_dpi' patient.dpi.pk %}">View DPI</a>
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'create_patient' %}">Add New Patient</a>
