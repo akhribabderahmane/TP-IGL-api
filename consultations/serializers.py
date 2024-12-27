@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Consultation, Ordonnance, Medicament, Validation
 from care.models import Soin  # Import the Soin model
+from examinations.models import Examen
+from examinations.serializers import ExamenSerializer  # Import the ExamenSerializer
 from patients.models import Dpi
 
 class SoinSerializer(serializers.ModelSerializer):
@@ -26,13 +28,16 @@ class OrdonnanceSerializer(serializers.ModelSerializer):
         model = Ordonnance
         fields = "__all__"
 
+
 class ConsultationSerializer(serializers.ModelSerializer):
     ordonnance = OrdonnanceSerializer(read_only=True)  # Include related ordonnance
-    soins = SoinSerializer(many=True, read_only=True, source='soin_set')  # Include related soins
+    soins = SoinSerializer(many=True, read_only=True)  # Include related soins
+    examens = ExamenSerializer(many=True, read_only=True, source="examen_set")  # Include related examens
 
     class Meta:
         model = Consultation
         fields = "__all__"
+
 
 class DpiSerializer(serializers.ModelSerializer):
     consultations = ConsultationSerializer(many=True, read_only=True)

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Consultation, Ordonnance, Medicament, Validation
+from examinations.models import Examen
 from patients.models import Dpi
 from .serializers import ConsultationSerializer, OrdonnanceSerializer, MedicamentSerializer, DpiSerializer
 
@@ -41,36 +42,19 @@ class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
     serializer_class = ConsultationSerializer
 
-    def create(self, request, *args, **kwargs):
-        """
-        Overriding the create method to:
-        - Create a new consultation.
-        - Automatically assign an empty ordonnance to it.
-        """
-        # Extract consultation data
-        consultation_data = request.data
-        dpi_id = consultation_data.get("dpi")
+    @action(detail=True, methods=['post'])
+    def add_examen(self, request, pk=None):
+        """Add an Examen to a specific consultation."""
+        consultation = self.get_object()
+        examen_data = request.data
 
-        try:
-            # Validate DPI existence
-            dpi = Dpi.objects.get(pk=dpi_id)
-        except Dpi.DoesNotExist:
-            return Response({"error": "DPI not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Create Consultation
-        serializer = self.get_serializer(data=consultation_data)
+        # Validate and create the Examen
+        serializer = ExamenSerializer(data=examen_data)
         serializer.is_valid(raise_exception=True)
-        consultation = serializer.save(dpi=dpi)
+        examen = serializer.save(consultation=consultation)
 
-        # Automatically create empty ordonnance with validation
-        validation = Validation.objects.create(data_validation={}, valid_state=False)
-        ordonnance = Ordonnance.objects.create(validation=validation)
-
-        # Assign ordonnance to the consultation
-        consultation.ordonnance = ordonnance
-        consultation.save()
-
-        return Response(self.get_serializer(consultation).data, status=status.HTTP_201_CREATED)
+        return Response(ExamenSerializer(examen).data, status=status.HTTP_201_CREATED)
+    
 
 class MedicamentViewSet(viewsets.ModelViewSet):
     queryset = Medicament.objects.all()
