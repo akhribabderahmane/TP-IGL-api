@@ -8,6 +8,7 @@ class UserRole(models.TextChoices):
     INFIRMIER = "infermier", "Infermier"
     LABORATIN = "laboratin", "Laboratin"
     RADIOLOGUE = "radiologue", "Radiologue"
+    PATIENT = "patient", "Patient"
 
 
 class User(models.Model):
