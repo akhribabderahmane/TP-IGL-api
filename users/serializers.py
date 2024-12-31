@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, UserRole
+from .models import User, UserRole, Medcin
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -34,3 +34,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "nom", "prenom", "telephone", "email", "role"]
+
+class DoctorSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Use the UserSerializer for nested user details
+
+    class Meta:
+        model = Medcin
+        fields = ['id', 'specialite', 'user']
+
+

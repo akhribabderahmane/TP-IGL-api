@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Consultation, Ordonnance, Medicament, Validation
 from examinations.models import Examen
-from patients.models import Dpi
+from patients.models import Dpi, Patient
 from .serializers import ConsultationSerializer, OrdonnanceSerializer, MedicamentSerializer, DpiSerializer
 
 class DpiViewSet(viewsets.ModelViewSet):
@@ -42,18 +42,32 @@ class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
     serializer_class = ConsultationSerializer
 
-    @action(detail=True, methods=['post'])
-    def add_examen(self, request, pk=None):
-        """Add an Examen to a specific consultation."""
-        consultation = self.get_object()
-        examen_data = request.data
+    @action(detail=False, methods=['get'])
+    def by_patient(self, request):
+        """Get the list of consultations by patient ID."""
+        patient_id = request.query_params.get('patient_id', None)
+        if not patient_id:
+            return Response(
+                {"error": "patient_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        try:
+            # Fetch the Patient record using the provided patient_id
+            patient = Patient.objects.get(pk=patient_id)
+        except Patient.DoesNotExist:
+            return Response(
+                {"error": "No patient found for the given ID"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-        # Validate and create the Examen
-        serializer = ExamenSerializer(data=examen_data)
-        serializer.is_valid(raise_exception=True)
-        examen = serializer.save(consultation=consultation)
+        # Access the patient's DPI
+        dpi = patient.dpi
 
-        return Response(ExamenSerializer(examen).data, status=status.HTTP_201_CREATED)
+        # Get consultations associated with the DPI
+        consultations = dpi.consultations.all()  # Assuming consultations are related to DPI
+        serializer = self.get_serializer(consultations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class MedicamentViewSet(viewsets.ModelViewSet):
