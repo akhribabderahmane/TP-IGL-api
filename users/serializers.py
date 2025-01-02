@@ -33,7 +33,7 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "nom", "prenom", "telephone", "email", "role"]
+        fields = ["id", "nom", "prenom", "telephone", "email", "password","role"]
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Use the UserSerializer for nested user details

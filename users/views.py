@@ -1,8 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import Medcin
-from .serializers import DoctorSerializer
+from .models import Medcin, User
+from .serializers import DoctorSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class DoctorViewSet(viewsets.ModelViewSet):
@@ -22,3 +22,7 @@ class DoctorViewSet(viewsets.ModelViewSet):
                 {"error": "Doctor not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
